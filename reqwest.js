@@ -312,6 +312,15 @@
       }
     }
 
+    function isJSONString(str) {
+      try {
+        JSON.parse(str);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
     function success (resp) {
       var type = o['type'] || resp && setType(resp.getResponseHeader('Content-Type')) // resp can be undefined in IE
       resp = (type !== 'jsonp') ? self.request : resp
@@ -333,7 +342,12 @@
           }
           break
         case 'js':
-          resp = eval(r)
+          // 尝试解决 Unexpected token ':' 的异常
+          if (isJSONString(r)) {
+            resp = eval('(' + r + ')')
+          } else {
+            resp = eval(r)
+          }
           break
         case 'html':
           resp = r
